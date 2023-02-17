@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script deletes branches with upstream references that have been deleted
+
+git fetch -p
+
+branchesToDelete=$(git branch -vv | gawk '{print $1,$4}' | grep ' gone]' | gawk '{print $1}')
+numBranches=$(echo "$branchesToDelete" | wc -l)
+
+if [ -z "$branchesToDelete" ]; then
+  printf "No branches were found to delete"
+  exit 0
+else
+  if [ "$numBranches" = 1 ]; then
+    printf "WARNING: the following branch will be deleted:\n"
+  else
+    printf "WARNING: the following branches will be deleted:\n"
+  fi
+  for branch in $branchesToDelete; do
+    printf '\t%s\n' "$branch"
+  done
+
+  read -r -p "Are you sure you want to delete? (y/n): " response
+  if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    printf "Deleting...\n"
+    for branch in $branchesToDelete; do
+      git branch -D "$branch"
+    done
+    printf "Done."
+    exit 0
+  else
+    printf "Cancelled."
+    exit 0
+  fi
+fi

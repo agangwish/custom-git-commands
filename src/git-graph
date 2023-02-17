@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# This script shows commit history as a graph.
+
+git log --all --decorate --oneline --graph
